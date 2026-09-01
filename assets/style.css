@@ -1,0 +1,951 @@
+:root {
+  /* Cool slate dark UI: blue-grey surfaces with a single aqua signal color.
+     Four clear surface steps, medium contrast text. Syntax colors further
+     below stay One Dark (self-hosted, so no CDN failure unstyles the code). */
+  --void: #14171d;   /* darkest: topbar, code surface */
+  --deep: #1c2027;   /* page canvas, sidebar, sticky file header */
+  --panel: #29303a;  /* elevated surfaces: hover rows, inline code, toggle track */
+  --muted: #8b95a6;  /* secondary/muted text, subtle icons */
+  --ink: #e3e8f0;    /* primary text — cool off-white, not stark */
+  --accent: #55d6c0; /* the one accent: aqua — buttons, active state, links, focus */
+  --on-accent: #0c1a18;
+
+  --border: rgba(126, 140, 160, 0.22);
+  --accent-wash: rgba(85, 214, 192, 0.12);
+  --accent-glow: rgba(85, 214, 192, 0.28);
+
+  --font: Calibri, "Segoe UI", "Trebuchet MS", sans-serif;
+  --subheader-height: 3.5625rem; /* shared by .sidebar-views and .file-panel-header so their bottom borders align */
+  --sidebar-width: 18.75rem;
+  --hairline: 0.0625rem; /* 1px, expressed in rem so it scales with everything else */
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: var(--font);
+  background: var(--deep);
+  color: var(--ink);
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ---------- Top bar ---------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--void);
+  color: var(--ink);
+  padding: 0.75rem 1.25rem;
+  flex-shrink: 0;
+  border-bottom: var(--hairline) solid var(--border);
+  gap: 1rem;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.topbar-title h1 {
+  font-size: 1.15rem;
+  margin: 0;
+  line-height: 1.2;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topbar-title p {
+  margin: 0.1rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.icon-btn {
+  background: transparent;
+  border: var(--hairline) solid var(--border);
+  color: var(--ink);
+  border-radius: 0.375rem;
+  padding: 0.4rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.icon-btn:hover {
+  background: var(--accent-wash);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.github-link {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--ink);
+  text-decoration: none;
+  border: var(--hairline) solid var(--border);
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.github-link:hover {
+  background: var(--accent-wash);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ---------- Layout ---------- */
+
+.layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.sidebar {
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+  background: var(--deep);
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  border-right: var(--hairline) solid var(--border);
+  transition: margin-left 0.2s ease;
+}
+
+.sidebar.collapsed {
+  margin-left: calc(-1 * var(--sidebar-width));
+}
+
+/* Top row of the sidebar. Carries --subheader-height so its bottom border
+   lines up exactly with the file panel header's across the layout. */
+.sidebar-views {
+  height: var(--subheader-height);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: 0 0.75rem;
+  border-bottom: var(--hairline) solid var(--border);
+  flex-shrink: 0;
+}
+
+.sidebar-views .mode-toggle {
+  width: 100%;
+}
+
+.sidebar-views .mode-btn {
+  flex: 1;
+  justify-content: center;
+}
+
+.sidebar-search {
+  display: flex;
+  align-items: center;
+  padding: 0.6rem 0.75rem;
+  border-bottom: var(--hairline) solid var(--border);
+  flex-shrink: 0;
+}
+
+.sidebar-search input {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border-radius: 0.375rem;
+  border: var(--hairline) solid var(--border);
+  background: var(--void);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 0.85rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sidebar-search input::placeholder {
+  color: var(--muted);
+}
+
+.sidebar-search input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 0.1875rem var(--accent-wash);
+}
+
+.tree {
+  overflow-y: auto;
+  flex: 1;
+  padding: 0.5rem 0.25rem;
+}
+
+.tree-loading, .tree-error {
+  padding: 1rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.tree-error {
+  color: var(--ink);
+  background: var(--void);
+  border-left: 0.1875rem solid var(--accent);
+  border-radius: 0.375rem;
+  margin: 0.5rem;
+}
+
+/* ---------- Tree nodes ---------- */
+
+.node {
+  user-select: none;
+}
+
+.node-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.4rem;
+  border-radius: 0.3125rem;
+  cursor: pointer;
+  font-size: 0.87rem;
+  white-space: nowrap;
+  color: var(--ink);
+}
+
+.node-row:hover {
+  background: var(--panel);
+}
+
+.node-row.active {
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: bold;
+}
+
+.node-row .chevron {
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+  opacity: 0.7;
+  color: var(--muted);
+}
+
+.node-row.open > .chevron,
+.node.expanded > .node-row .chevron {
+  transform: rotate(90deg);
+}
+
+.node-row.active .chevron {
+  color: var(--on-accent);
+  opacity: 1;
+}
+
+.node-row .node-icon {
+  flex-shrink: 0;
+  display: flex;
+  color: var(--muted);
+}
+
+.node-row.active .node-icon {
+  color: var(--on-accent);
+}
+
+.node-row .node-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.children {
+  margin-left: 1.1rem;
+  display: none;
+  border-left: var(--hairline) dashed var(--border);
+  padding-left: 0.3rem;
+}
+
+.node.expanded > .children {
+  display: block;
+}
+
+.node.hidden {
+  display: none;
+}
+
+/* ---------- App view: one block per project ---------- */
+
+.app-block {
+  background: var(--void);
+  border: var(--hairline) solid var(--border);
+  border-radius: 0.375rem;
+  padding: 0.4rem 0.35rem 0.45rem;
+  margin-bottom: 0.5rem;
+}
+
+/* The project name is the only thing that differs between blocks, so it reads
+   as the heading; "Arduino Sketch" / "Web App" / "Readme" repeat everywhere
+   and sit back as secondary labels beneath it. */
+.app-block-title {
+  padding: 0.15rem 0.4rem 0.4rem;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app-entry {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+/* :not(.active) so hovering the selected row can't override the dark-on-accent
+   text .node-row.active sets — both selectors carry the same specificity. */
+.app-entry:not(.active):hover {
+  color: var(--ink);
+}
+
+.app-entry.hidden,
+.app-block.hidden {
+  display: none;
+}
+
+/* ---------- Content area ---------- */
+
+.content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* .file-panel-body scrolls, not this */
+  padding: 0;
+  background: var(--void);
+}
+
+.welcome {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: var(--muted);
+  text-align: center;
+  gap: 0.75rem;
+}
+
+.welcome-icon {
+  color: var(--muted);
+}
+
+.file-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--void);
+}
+
+/* The header is a fixed row rather than part of the scrolled area, so the
+   scrollbar begins beneath it — the same way the sidebar's tree scrolls under
+   its view toggle and filter. It also keeps the header full-bleed to the right
+   edge, since the scrollbar now belongs to the body below it. */
+.file-panel-header {
+  flex-shrink: 0;
+  height: var(--subheader-height);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--deep);
+  color: var(--ink);
+  padding: 0 1.25rem;
+  font-size: 0.85rem;
+  gap: 1rem;
+  border-bottom: var(--hairline) solid var(--border);
+  transition: border-color 0.15s ease;
+}
+
+.file-panel.editing .file-panel-header {
+  border-bottom-color: var(--accent);
+}
+
+/* Everything under the header lives here, and this is what scrolls. */
+.file-panel-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.file-title-group {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.file-panel-header .file-path {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.header-github-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--muted);
+  transition: color 0.15s ease;
+}
+
+.header-github-link:hover {
+  color: var(--accent);
+}
+
+.file-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+.file-panel-header .file-meta {
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.mode-toggle {
+  display: flex;
+  align-items: center;
+  background: var(--panel);
+  border: var(--hairline) solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.1875rem;
+  gap: 0.125rem;
+  flex-shrink: 0;
+}
+
+.mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font);
+  font-size: 0.78rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.mode-btn:hover {
+  color: var(--ink);
+}
+
+.mode-btn.active {
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: bold;
+  cursor: default;
+  box-shadow: 0 0 0.75rem var(--accent-glow);
+}
+
+.mode-btn.active:hover {
+  color: var(--on-accent);
+}
+
+/* Locked rather than removed, so the pair keeps its shape and the reason is
+   discoverable on hover. */
+.mode-btn[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.mode-btn[disabled]:hover {
+  color: var(--muted);
+}
+
+.fullscreen-btn {
+  display: none; /* shown via JS only while the app is actually running */
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  color: var(--accent);
+  border: var(--hairline) solid var(--accent);
+  border-radius: 0.375rem;
+  padding: 0.4rem 0.7rem;
+  font-family: var(--font);
+  font-size: 0.8rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.fullscreen-btn:hover {
+  background: var(--accent-wash);
+}
+
+.fullscreen-btn.active {
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: bold;
+}
+
+.copy-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--accent);
+  color: var(--on-accent);
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.4rem 0.75rem;
+  font-family: var(--font);
+  font-size: 0.8rem;
+  font-weight: bold;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.copy-btn:hover {
+  transform: translateY(-0.0625rem);
+  box-shadow: 0 0 0.9375rem var(--accent-glow);
+}
+
+.copy-btn.copied {
+  background: var(--ink);
+}
+
+/* Fallback viewer for files too large for CodeMirror; fills the body the same
+   way the editor does. */
+.code-edit {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 1rem;
+  border: none;
+  outline: none;
+  resize: vertical;
+  background: var(--void);
+  color: var(--ink);
+  font-family: "Cascadia Code", Consolas, "Courier New", monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  white-space: pre;
+  overflow: auto;
+  box-sizing: border-box;
+}
+
+/* ---------- CodeMirror: self-hosted One Dark theme ----------
+   Defined here (theme name "onedark") rather than pulled from a CDN, so a
+   blocked/failed stylesheet request can never leave the editor as default
+   white-on-black. Background matches --void for a seamless surface. */
+
+/* Fills the panel body and scrolls internally, so only the visible lines are
+   rendered — see the viewportMargin note in app.js. */
+.CodeMirror {
+  height: 100%;
+  font-family: "Cascadia Code", Consolas, "Courier New", monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* Fixed room for four digits (9999 lines). CodeMirror otherwise measures the
+   longest line number and sizes the gutter per file, so the code would start
+   at a different x in a 90-line sketch than in a 650-line one. */
+.CodeMirror-linenumbers {
+  min-width: 2.6rem;
+}
+
+.cm-s-onedark.CodeMirror {
+  background: var(--void);
+  color: var(--ink);
+}
+
+.cm-s-onedark .CodeMirror-gutters {
+  background: var(--void);
+  border-right: var(--hairline) solid var(--border);
+}
+
+.cm-s-onedark .CodeMirror-linenumber {
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+.cm-s-onedark .CodeMirror-cursor {
+  border-left: 0.09375rem solid var(--ink);
+}
+
+.cm-s-onedark .CodeMirror-selected,
+.cm-s-onedark.CodeMirror-focused .CodeMirror-selected {
+  background: rgba(85, 214, 192, 0.20);
+}
+
+.cm-s-onedark .CodeMirror-matchingbracket {
+  color: var(--ink) !important;
+  background: rgba(85, 214, 192, 0.30);
+  outline: none;
+}
+
+/* One Dark syntax colors */
+.cm-s-onedark span.cm-comment { color: #7f8899; font-style: italic; }
+.cm-s-onedark span.cm-keyword { color: #d08ce6; }
+.cm-s-onedark span.cm-meta { color: #d08ce6; }        /* #define, #include */
+.cm-s-onedark span.cm-string { color: #a3d17f; }
+.cm-s-onedark span.cm-string-2 { color: #5fc7d4; }
+.cm-s-onedark span.cm-number { color: #dca46d; }
+.cm-s-onedark span.cm-atom { color: #dca46d; }
+.cm-s-onedark span.cm-def { color: #6cb6ff; }
+.cm-s-onedark span.cm-builtin { color: #5fc7d4; }
+.cm-s-onedark span.cm-type { color: #ecc981; }
+.cm-s-onedark span.cm-variable { color: var(--ink); }
+.cm-s-onedark span.cm-variable-2 { color: #ea767f; }
+.cm-s-onedark span.cm-variable-3 { color: #ecc981; }
+.cm-s-onedark span.cm-property { color: #6cb6ff; }
+.cm-s-onedark span.cm-operator { color: #5fc7d4; }
+.cm-s-onedark span.cm-qualifier { color: #ecc981; }
+.cm-s-onedark span.cm-bracket { color: var(--ink); }
+.cm-s-onedark span.cm-tag { color: #ea767f; }
+.cm-s-onedark span.cm-attribute { color: #dca46d; }
+.cm-s-onedark span.cm-header { color: #ea767f; font-weight: bold; }
+.cm-s-onedark span.cm-quote { color: #a3d17f; font-style: italic; }
+.cm-s-onedark span.cm-link { color: #6cb6ff; text-decoration: underline; }
+.cm-s-onedark span.cm-url { color: #5fc7d4; }
+.cm-s-onedark span.cm-hr { color: var(--muted); }
+.cm-s-onedark span.cm-error { color: #ea767f; }
+
+/* ---------- Markdown preview ---------- */
+
+.md-preview {
+  display: none;
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.75rem 2rem;
+  color: var(--ink);
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+.md-preview h1, .md-preview h2, .md-preview h3,
+.md-preview h4, .md-preview h5, .md-preview h6 {
+  color: var(--ink);
+  line-height: 1.3;
+  margin: 1.5rem 0 0.75rem;
+}
+
+.md-preview h1, .md-preview h2 {
+  border-bottom: var(--hairline) solid var(--border);
+  padding-bottom: 0.4rem;
+}
+
+.md-preview p, .md-preview ul, .md-preview ol {
+  margin: 0.75rem 0;
+}
+
+.md-preview li {
+  margin: 0.25rem 0;
+}
+
+.md-preview a {
+  color: var(--accent);
+}
+
+.md-preview img {
+  max-width: 100%;
+  border-radius: 0.375rem;
+}
+
+.md-preview code {
+  background: var(--panel);
+  color: var(--ink);
+  padding: 0.15rem 0.35rem;
+  border-radius: 0.25rem;
+  font-family: "Cascadia Code", Consolas, "Courier New", monospace;
+  font-size: 0.85em;
+}
+
+.md-preview pre {
+  background: var(--panel);
+  padding: 1rem;
+  border-radius: 0.375rem;
+  overflow-x: auto;
+}
+
+.md-preview pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.md-preview blockquote {
+  border-left: 0.1875rem solid var(--accent);
+  margin: 1rem 0;
+  padding: 0.25rem 1rem;
+  color: var(--muted);
+}
+
+.md-preview table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+  font-size: 0.9em;
+}
+
+.md-preview th, .md-preview td {
+  border: var(--hairline) solid var(--border);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.md-preview th {
+  color: var(--accent);
+}
+
+.md-preview hr {
+  border: none;
+  border-top: var(--hairline) solid var(--border);
+  margin: 1.5rem 0;
+}
+
+.image-preview {
+  padding: 1.5rem;
+  text-align: center;
+  background: var(--void);
+}
+
+.image-preview img {
+  max-width: 100%;
+  max-height: 70vh;
+  border-radius: 0.375rem;
+  border: var(--hairline) solid var(--border);
+}
+
+/* ---------- Live web-app preview ---------- */
+
+/* A running app fills the body and scrolls inside itself, so the body must not
+   scroll too. Code files keep the body's normal scrolling. */
+.file-panel.running-app .file-panel-body {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Fullscreen targets this wrapper (see app.js) rather than the iframe alone,
+   so the exit button — an absolutely-positioned child — is promoted into the
+   browser's top layer along with it and stays clickable while fullscreen. */
+.app-frame-wrap {
+  display: none;
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.app-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: #ffffff;
+}
+
+.app-exit-fullscreen {
+  display: none;
+  position: absolute;
+  /* Bottom corner rather than top: app UIs (including these firmware web
+     apps) far more often put their own controls in a top bar, so this is the
+     corner least likely to sit on top of something the app needs clickable. */
+  bottom: 0.75rem;
+  right: 0.75rem;
+  z-index: 10;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: none;
+  border-radius: 0.375rem;
+  background: rgba(20, 23, 29, 0.72);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.app-exit-fullscreen:hover {
+  background: rgba(20, 23, 29, 0.9);
+}
+
+/* Only reachable — and only rendered — while the wrapper is actually
+   fullscreen; :fullscreen scopes it so it can never float over the app
+   during normal, non-fullscreen use. */
+.app-frame-wrap:fullscreen .app-exit-fullscreen {
+  display: flex;
+}
+
+/* Shown when the browser force-exits fullscreen to present a device chooser
+   (Web Serial/USB/HID) — see the postMessage handling in app.js. Fixed to the
+   viewport since the panel that requested it may have scrolled. */
+.fs-reentry-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--panel);
+  color: var(--ink);
+  border: var(--hairline) solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.6rem 0.75rem 0.6rem 1rem;
+  font-size: 0.85rem;
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.35);
+}
+
+.fs-reentry-toast button {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--accent);
+  color: var(--on-accent);
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.4rem 0.7rem;
+  font-family: var(--font);
+  font-size: 0.8rem;
+  font-weight: bold;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.binary-notice {
+  padding: 2rem;
+  text-align: center;
+  color: var(--ink);
+  background: var(--void);
+}
+
+.binary-notice a {
+  color: var(--accent);
+}
+
+.loading-msg, .error-msg {
+  padding: 1.5rem 1.25rem;
+  color: var(--ink);
+  background: var(--void);
+}
+
+.loading-msg span {
+  color: var(--muted);
+}
+
+/* Slim progress bar pinned under the sticky file header while a file
+   downloads. Determinate (width %) when the size is known; otherwise an
+   indeterminate sweep. */
+.loading-track {
+  height: 0.25rem;
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.loading-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  transition: width 0.2s ease;
+}
+
+.loading-fill.indeterminate {
+  width: 40%;
+  animation: loading-sweep 1.2s ease-in-out infinite;
+}
+
+@keyframes loading-sweep {
+  0% { margin-left: -40%; }
+  100% { margin-left: 100%; }
+}
+
+.error-msg {
+  border-left: 0.1875rem solid var(--accent);
+}
+
+/* ---------- scrollbars ----------
+   Every scroll container in the app is listed here; miss one and it falls back
+   to the browser's default scrollbar, which looks nothing like the rest. */
+
+.tree::-webkit-scrollbar,
+.content::-webkit-scrollbar,
+.file-panel-body::-webkit-scrollbar,
+.CodeMirror-vscrollbar::-webkit-scrollbar,
+.CodeMirror-hscrollbar::-webkit-scrollbar {
+  width: 0.625rem;
+  height: 0.625rem;
+}
+
+.tree::-webkit-scrollbar-thumb,
+.content::-webkit-scrollbar-thumb,
+.file-panel-body::-webkit-scrollbar-thumb,
+.CodeMirror-vscrollbar::-webkit-scrollbar-thumb,
+.CodeMirror-hscrollbar::-webkit-scrollbar-thumb {
+  background: var(--panel);
+  border-radius: 0.3125rem;
+}
+
+.tree::-webkit-scrollbar-track,
+.content::-webkit-scrollbar-track,
+.file-panel-body::-webkit-scrollbar-track,
+.CodeMirror-vscrollbar::-webkit-scrollbar-track,
+.CodeMirror-hscrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  /* Inset the track so the thumb never butts up against the panel edge above
+     or below it. Padding on the container cannot do this — the track always
+     spans the container's full height regardless. */
+  margin: 0.375rem 0;
+}
+
+/* ---------- responsive ---------- */
+
+/* em, not px/rem: media query breakpoints are measured against the
+   browser's default 16px regardless of any root font-size override, so em
+   is the unit that stays correct if that base ever changes. */
+@media (max-width: 45em) {
+  .sidebar {
+    position: fixed;
+    top: 4rem;
+    bottom: 0;
+    left: 0;
+    z-index: 20;
+    box-shadow: 0.25rem 0 0.75rem rgba(0, 0, 0, 0.3);
+  }
+  .sidebar.collapsed {
+    margin-left: calc(-1 * var(--sidebar-width));
+  }
+  .topbar-title p {
+    display: none;
+  }
+}
