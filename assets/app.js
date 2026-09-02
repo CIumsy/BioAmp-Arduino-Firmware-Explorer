@@ -63,6 +63,10 @@
     };
   }
 
+  function encodeGitHubPath(path) {
+    return path.split("/").map(encodeURIComponent).join("/");
+  }
+
   function explorerUrlFor(repoInfo) {
     var next = new URL(location.href);
     next.search = "";
@@ -1224,15 +1228,16 @@
     OWNER = detected.owner;
     REPO = detected.repo;
     REPO_URL = "https://github.com/" + OWNER + "/" + REPO;
-    repoUrlEl.value = REPO_URL + (detected.branch ? "/tree/" + detected.branch : "");
+    repoUrlEl.value = REPO_URL + (detected.branch ? "/tree/" + encodeGitHubPath(detected.branch) : "");
     document.getElementById("githubLink").href = REPO_URL;
 
     fetch("https://api.github.com/repos/" + OWNER + "/" + REPO)
       .then(checkedJson)
       .then(function (info) {
         BRANCH = detected.branch || info.default_branch || "main";
-        RAW_BASE = "https://raw.githubusercontent.com/" + OWNER + "/" + REPO + "/" + BRANCH + "/";
-        API_TREE_URL = "https://api.github.com/repos/" + OWNER + "/" + REPO + "/git/trees/" + BRANCH + "?recursive=1";
+        var encodedBranch = encodeGitHubPath(BRANCH);
+        RAW_BASE = "https://raw.githubusercontent.com/" + OWNER + "/" + REPO + "/" + encodedBranch + "/";
+        API_TREE_URL = "https://api.github.com/repos/" + OWNER + "/" + REPO + "/git/trees/" + encodedBranch + "?recursive=1";
 
         var title = formatTitle(info.name || REPO);
         document.getElementById("repoTitle").textContent = title;
